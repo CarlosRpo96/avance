@@ -1,12 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
-
-from models import Ticket
-from schemas import TicketCreate, TicketUpdate, TicketResponse
-from config.database import get_db
-
-router = APIRouter()
+from fastapi import  HTTPException
+from models.ticket_model import Ticket
+from schemas.ticket_schema import TicketCreate, TicketUpdate #ticketresponse delete
 
 def create_ticket(ticket: TicketCreate, db):
     db_ticket = Ticket(title=ticket.title, description=ticket.description)
@@ -15,18 +9,18 @@ def create_ticket(ticket: TicketCreate, db):
     db.refresh(db_ticket)
     return db_ticket
 
-def get_all_tickets(db):
+def get_all_ticket(db):
     return db.query(Ticket).all()
 
-@router.get("/tickets/{ticket_id}", response_model=TicketResponse)
-def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
+
+def get_ticket(ticket_id: int, db):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return ticket
 
-@router.put("/tickets/{ticket_id}", response_model=TicketResponse)
-def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session = Depends(get_db)):
+
+def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -42,8 +36,8 @@ def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session = Dep
     db.refresh(ticket)
     return ticket
 
-@router.delete("/tickets/{ticket_id}", response_model=dict)
-def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):
+
+def delete_ticket(ticket_id: int, db):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
